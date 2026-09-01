@@ -221,21 +221,6 @@ async function actualiserCompteurClients() {
 
 actualiserCompteurClients();
 
-async function actualiserCompteurClients() {
-    const compteur = document.getElementById("totalClients");
-
-    if (!compteur) return;
-
-    try {
-        const response = await fetch("/api/clients");
-        const clients = await response.json();
-        compteur.textContent = clients.length;
-    } catch (erreur) {
-        console.error("Erreur compteur clients :", erreur);
-    }
-}
-
-actualiserCompteurClients();
 
 async function actualiserCompteurFactures() {
     const compteur = document.getElementById("totalFactures");
@@ -496,12 +481,289 @@ window.voirFacture = async function(id) {
         console.error(erreur);
         alert("❌ Impossible d'afficher la facture.");
     }
-};window.voirFacture = function(id) {
-    alert("Affichage de la facture : " + id);
 };
 
-window.modifierFacture = function(id) {
-    alert("Modification de la facture : " + id);
+window.modifierFacture = async function(id) {
+    try {
+        const response = await fetch("/api/factures");
+        const factures = await response.json();
+
+        if (!response.ok) {
+            throw new Error("Impossible de récupérer les factures");
+        }
+
+        const facture = factures.find(
+            f => String(f.id) === String(id)
+        );
+
+        if (!facture) {
+            alert("❌ Facture introuvable.");
+            return;
+        }
+
+        const clientsResponse = await fetch("/api/clients");
+        const clients = await clientsResponse.json();
+
+        if (!clientsResponse.ok) {
+            throw new Error("Impossible de récupérer les clients");
+        }
+
+        const main = document.querySelector("main");
+
+        main.innerHTML = `
+            <section style="padding:30px;max-width:800px;margin:auto;">
+
+                <button
+                    id="retourFactures"
+                    type="button"
+                    style="
+                        padding:12px 18px;
+                        border:0;
+                        border-radius:10px;
+                        background:#eef2ff;
+                        font-weight:bold;
+                        margin-bottom:20px;
+                    ">
+                    ← Retour aux factures
+                </button>
+
+                <div style="
+                    background:white;
+                    padding:30px;
+                    border-radius:20px;
+                    box-shadow:0 4px 20px rgba(0,0,0,.08);
+                ">
+
+                    <h1>✏️ Modifier la facture</h1>
+
+                    <form id="formModifierFacture">
+
+                        <label><strong>👤 Client</strong></label>
+                        <select id="editClient"
+                            required
+                            style="
+                                width:100%;
+                                box-sizing:border-box;
+                                padding:14px;
+                                margin:8px 0 20px;
+                                border:1px solid #ddd;
+                                border-radius:10px;
+                            ">
+                        </select>
+
+                        <label><strong>📅 Date</strong></label>
+                        <input
+                            id="editDate"
+                            type="date"
+                            required
+                            style="
+                                width:100%;
+                                box-sizing:border-box;
+                                padding:14px;
+                                margin:8px 0 20px;
+                                border:1px solid #ddd;
+                                border-radius:10px;
+                            ">
+
+                        <label><strong>📦 Objet</strong></label>
+                        <input
+                            id="editObjet"
+                            type="text"
+                            required
+                            style="
+                                width:100%;
+                                box-sizing:border-box;
+                                padding:14px;
+                                margin:8px 0 20px;
+                                border:1px solid #ddd;
+                                border-radius:10px;
+                            ">
+
+                        <label><strong>💰 Montant (FCFA)</strong></label>
+                        <input
+                            id="editMontant"
+                            type="number"
+                            min="0"
+                            required
+                            style="
+                                width:100%;
+                                box-sizing:border-box;
+                                padding:14px;
+                                margin:8px 0 20px;
+                                border:1px solid #ddd;
+                                border-radius:10px;
+                            ">
+
+                        <label><strong>📌 Statut</strong></label>
+                        <select
+                            id="editStatut"
+                            style="
+                                width:100%;
+                                box-sizing:border-box;
+                                padding:14px;
+                                margin:8px 0 25px;
+                                border:1px solid #ddd;
+                                border-radius:10px;
+                            ">
+                            <option value="Brouillon">Brouillon</option>
+                            <option value="Envoyée">Envoyée</option>
+                            <option value="Payée">Payée</option>
+                            <option value="Annulée">Annulée</option>
+                        </select>
+
+                        <div style="
+                            display:flex;
+                            gap:10px;
+                            flex-wrap:wrap;
+                        ">
+
+                            <button
+                                id="annulerModification"
+                                type="button"
+                                style="
+                                    padding:14px 20px;
+                                    border:0;
+                                    border-radius:10px;
+                                    background:#eee;
+                                    font-weight:bold;
+                                ">
+                                Annuler
+                            </button>
+
+                            <button
+                                id="enregistrerModification"
+                                type="submit"
+                                style="
+                                    padding:14px 20px;
+                                    border:0;
+                                    border-radius:10px;
+                                    background:#2563eb;
+                                    color:white;
+                                    font-weight:bold;
+                                ">
+                                💾 Enregistrer les modifications
+                            </button>
+
+                        </div>
+
+                    </form>
+                </div>
+            </section>
+        `;
+
+        const selectClient = document.getElementById("editClient");
+
+        clients.forEach(client => {
+            const option = document.createElement("option");
+            option.value = client.id;
+            option.textContent = client.nom;
+
+            if (String(client.id) === String(facture.clientId)) {
+                option.selected = true;
+            }
+
+            selectClient.appendChild(option);
+        });
+
+        document.getElementById("editDate").value =
+            facture.date || "";
+
+        document.getElementById("editObjet").value =
+            facture.objet || "";
+
+        document.getElementById("editMontant").value =
+            Number(facture.montant || 0);
+
+        document.getElementById("editStatut").value =
+            facture.statut || "Brouillon";
+
+        document.getElementById("retourFactures").onclick =
+            () => afficherFactures();
+
+        document.getElementById("annulerModification").onclick =
+            () => afficherFactures();
+
+        document.getElementById("formModifierFacture")
+            .addEventListener("submit", async function(event) {
+
+                event.preventDefault();
+
+                const bouton =
+                    document.getElementById("enregistrerModification");
+
+                bouton.disabled = true;
+                bouton.textContent = "⏳ Enregistrement...";
+
+                const clientId =
+                    document.getElementById("editClient").value;
+
+                const clientSelectionne =
+                    clients.find(
+                        client => String(client.id) === String(clientId)
+                    );
+
+                const donnees = {
+                    clientId: clientId,
+                    clientNom: clientSelectionne
+                        ? clientSelectionne.nom
+                        : facture.clientNom,
+                    date: document.getElementById("editDate").value,
+                    objet: document.getElementById("editObjet").value,
+                    montant: Number(
+                        document.getElementById("editMontant").value
+                    ),
+                    statut: document.getElementById("editStatut").value
+                };
+
+                try {
+                    const updateResponse = await fetch(
+                        "/api/factures/" + id,
+                        {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(donnees)
+                        }
+                    );
+
+                    const resultat = await updateResponse.json();
+
+                    if (!updateResponse.ok) {
+                        throw new Error(
+                            resultat.error ||
+                            "Erreur lors de la modification"
+                        );
+                    }
+
+                    alert("✅ Facture modifiée avec succès.");
+
+                    voirFacture(id);
+
+                } catch (erreur) {
+
+                    console.error(erreur);
+
+                    alert(
+                        "❌ Impossible de modifier la facture : " +
+                        erreur.message
+                    );
+
+                    bouton.disabled = false;
+                    bouton.textContent =
+                        "💾 Enregistrer les modifications";
+                }
+            });
+
+    } catch (erreur) {
+
+        console.error(erreur);
+
+        alert(
+            "❌ Impossible d'ouvrir la modification : " +
+            erreur.message
+        );
+    }
 };
 
 window.supprimerFacture = async function(id) {
