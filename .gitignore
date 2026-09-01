@@ -1,0 +1,13 @@
+node_modules/
+*.log
+data/
+.env
+.DS_Store
+*.backup
+*.bak
+*.bak2
+*.clients-ok
+*.etape-factures-ok
+*.factures-backup
+public/app.js.*
+public/index.html.*

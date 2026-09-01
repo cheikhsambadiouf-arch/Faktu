@@ -1,0 +1,24 @@
+{
+  "name": "faktu",
+  "version": "1.0.0",
+  "description": "Plateforme SaaS moderne de gestion et de recherche de factures et documents commerciaux.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cheikhsambadiouf-arch/Faktu.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/cheikhsambadiouf-arch/Faktu/issues"
+  },
+  "homepage": "https://github.com/cheikhsambadiouf-arch/Faktu#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
