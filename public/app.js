@@ -8,7 +8,7 @@ navItems.forEach((item) => { console.log("NAVIGATION ACTIVE", item.textContent);
     const texte = item.textContent.trim();
     if (texte.includes('Clients')) afficherClients();
     else if (texte.includes('Factures')) afficherFactures();
-    else if (texte.includes('Accueil')) location.reload();
+    else if (texte.includes('Accueil')) window.location.href = '/';
   });
 });
     const nouveauClientAccueil = document.getElementById("nouveauClientAccueil");
@@ -1361,5 +1361,5 @@ window.supprimerProduit = async function supprimerProduit(id) {
    CORRECTION NAVIGATION ACCUEIL
    ========================================================= */
 window.allerAccueil = function () {
-    window.location.reload();
+    window.location.href = '/';
 };
