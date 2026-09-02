@@ -957,3 +957,409 @@ window.afficherFormulaireFacture = async function() {
     }
 };
 
+
+
+/* =========================================
+   MODULE PRODUITS — INTERFACE
+   ========================================= */
+
+window.afficherProduits = async function afficherProduits() {
+    const main = document.querySelector("main");
+
+    if (!main) return;
+
+    main.innerHTML = `
+        <section style="padding:20px;max-width:1100px;margin:auto;">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+                <div>
+                    <h1 style="margin:0 0 5px;">📦 Mes produits</h1>
+                    <p style="color:#667085;margin:0;">
+                        Gérez vos produits simplement.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    onclick="afficherFormulaireProduit()"
+                    style="padding:13px 18px;border:0;border-radius:12px;background:#2563eb;color:white;font-weight:bold;cursor:pointer;">
+                    ＋ Ajouter un produit
+                </button>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <input
+                    id="rechercheProduits"
+                    type="search"
+                    placeholder="🔎 Rechercher un produit..."
+                    style="width:100%;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:15px;">
+            </div>
+
+            <div id="listeProduits">
+                <p style="text-align:center;padding:30px;">⏳ Chargement...</p>
+            </div>
+
+        </section>
+    `;
+
+    document
+        .getElementById("rechercheProduits")
+        .addEventListener("input", afficherListeProduits);
+
+    await afficherListeProduits();
+};
+
+
+let produitsFaktu = [];
+
+
+async function afficherListeProduits() {
+    const conteneur = document.getElementById("listeProduits");
+
+    if (!conteneur) return;
+
+    try {
+        const response = await fetch("/api/produits");
+
+        if (!response.ok) {
+            throw new Error("Impossible de récupérer les produits");
+        }
+
+        produitsFaktu = await response.json();
+
+        const recherche = (
+            document.getElementById("rechercheProduits")?.value || ""
+        ).toLowerCase().trim();
+
+        const produits = produitsFaktu.filter(produit => {
+            return (
+                produit.nom.toLowerCase().includes(recherche) ||
+                (produit.categorie || "").toLowerCase().includes(recherche)
+            );
+        });
+
+        if (produits.length === 0) {
+            conteneur.innerHTML = `
+                <div style="background:white;border-radius:16px;padding:40px;text-align:center;box-shadow:0 4px 15px #0000000d;">
+                    <div style="font-size:45px;margin-bottom:10px;">📦</div>
+                    <h3>Aucun produit trouvé</h3>
+                    <p style="color:#667085;margin:10px 0 20px;">
+                        Ajoutez votre premier produit ou modifiez votre recherche.
+                    </p>
+                    <button
+                        onclick="afficherFormulaireProduit()"
+                        style="padding:12px 18px;border:0;border-radius:10px;background:#2563eb;color:white;font-weight:bold;">
+                        ＋ Ajouter un produit
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        conteneur.innerHTML = `
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;">
+                ${produits.map(produit => `
+                    <article style="background:white;border-radius:16px;padding:16px;box-shadow:0 4px 15px #0000000d;">
+
+                        ${
+                            produit.photo
+                            ? `<img src="${produit.photo}" alt=""
+                                style="width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:12px;">`
+                            : `<div style="height:180px;background:#f2f4f7;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:55px;margin-bottom:12px;">
+                                📦
+                              </div>`
+                        }
+
+                        <h3 style="margin-bottom:7px;">
+                            ${produit.nom}
+                        </h3>
+
+                        <strong style="font-size:21px;">
+                            ${Number(produit.prix).toLocaleString("fr-FR")} FCFA
+                        </strong>
+
+                        <p style="margin:8px 0;color:#667085;">
+                            Stock : ${produit.stock} ${produit.unite || ""}
+                        </p>
+
+                        <p style="margin-bottom:12px;">
+                            ${
+                                produit.actif
+                                ? '<span style="color:#15803d;font-weight:bold;">🟢 Disponible</span>'
+                                : '<span style="color:#dc2626;font-weight:bold;">🔴 Désactivé</span>'
+                            }
+                        </p>
+
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button
+                                onclick="modifierProduit(${produit.id})"
+                                style="flex:1;padding:10px;border:0;border-radius:10px;background:#eee;font-weight:bold;">
+                                ✏️ Modifier
+                            </button>
+
+                            <button
+                                onclick="changerStatutProduit(${produit.id}, ${!produit.actif})"
+                                style="flex:1;padding:10px;border:0;border-radius:10px;background:#eee;font-weight:bold;">
+                                ${produit.actif ? "⏸️ Désactiver" : "▶️ Activer"}
+                            </button>
+                        </div>
+
+                        <button
+                            onclick="supprimerProduit(${produit.id})"
+                            style="width:100%;margin-top:8px;padding:10px;border:0;border-radius:10px;background:#fee2e2;color:#b91c1c;font-weight:bold;">
+                            🗑️ Supprimer
+                        </button>
+
+                    </article>
+                `).join("")}
+            </div>
+        `;
+
+    } catch (erreur) {
+        console.error(erreur);
+
+        conteneur.innerHTML = `
+            <div style="padding:25px;background:#fee2e2;border-radius:14px;">
+                ❌ Impossible de charger les produits.
+            </div>
+        `;
+    }
+}
+
+
+window.afficherFormulaireProduit = function afficherFormulaireProduit(produit = null) {
+
+    const main = document.querySelector("main");
+
+    const modification = produit !== null;
+
+    main.innerHTML = `
+        <section style="padding:20px;max-width:650px;margin:auto;">
+
+            <h1 style="margin-bottom:20px;">
+                ${modification ? "✏️ Modifier le produit" : "➕ Nouveau produit"}
+            </h1>
+
+            <form id="produitForm"
+                style="background:white;padding:20px;border-radius:16px;box-shadow:0 4px 15px #0000000d;">
+
+                <label style="display:block;margin-bottom:15px;">
+                    <strong>Nom du produit *</strong>
+                    <input
+                        id="produitNom"
+                        required
+                        value="${modification ? produit.nom : ""}"
+                        placeholder="Ex : Poulet entier"
+                        style="width:100%;padding:13px;margin-top:6px;border:1px solid #ddd;border-radius:10px;">
+                </label>
+
+                <label style="display:block;margin-bottom:15px;">
+                    <strong>Prix *</strong>
+                    <input
+                        id="produitPrix"
+                        type="number"
+                        min="0"
+                        required
+                        value="${modification ? produit.prix : ""}"
+                        placeholder="Ex : 5000"
+                        style="width:100%;padding:13px;margin-top:6px;border:1px solid #ddd;border-radius:10px;">
+                </label>
+
+                <label style="display:block;margin-bottom:15px;">
+                    <strong>Stock</strong>
+                    <input
+                        id="produitStock"
+                        type="number"
+                        min="0"
+                        value="${modification ? produit.stock : 0}"
+                        style="width:100%;padding:13px;margin-top:6px;border:1px solid #ddd;border-radius:10px;">
+                </label>
+
+                <label style="display:block;margin-bottom:15px;">
+                    <strong>Catégorie</strong>
+                    <input
+                        id="produitCategorie"
+                        value="${modification ? produit.categorie || "" : ""}"
+                        placeholder="Ex : Volaille"
+                        style="width:100%;padding:13px;margin-top:6px;border:1px solid #ddd;border-radius:10px;">
+                </label>
+
+                <label style="display:block;margin-bottom:15px;">
+                    <strong>Unité</strong>
+                    <input
+                        id="produitUnite"
+                        value="${modification ? produit.unite || "unité" : "unité"}"
+                        placeholder="unité, kg, litre..."
+                        style="width:100%;padding:13px;margin-top:6px;border:1px solid #ddd;border-radius:10px;">
+                </label>
+
+                <label style="display:block;margin-bottom:15px;">
+                    <strong>Photo</strong>
+                    <input
+                        id="produitPhoto"
+                        type="url"
+                        value="${modification ? produit.photo || "" : ""}"
+                        placeholder="URL de la photo (facultatif)"
+                        style="width:100%;padding:13px;margin-top:6px;border:1px solid #ddd;border-radius:10px;">
+                </label>
+
+                <label style="display:block;margin-bottom:20px;">
+                    <strong>Description</strong>
+                    <textarea
+                        id="produitDescription"
+                        rows="3"
+                        placeholder="Description facultative"
+                        style="width:100%;padding:13px;margin-top:6px;border:1px solid #ddd;border-radius:10px;">${modification ? produit.description || "" : ""}</textarea>
+                </label>
+
+                <div style="display:flex;gap:10px;">
+                    <button
+                        type="button"
+                        onclick="afficherProduits()"
+                        style="flex:1;padding:14px;border:0;border-radius:10px;background:#eee;font-weight:bold;">
+                        Annuler
+                    </button>
+
+                    <button
+                        type="submit"
+                        style="flex:1;padding:14px;border:0;border-radius:10px;background:#2563eb;color:white;font-weight:bold;">
+                        💾 Enregistrer
+                    </button>
+                </div>
+
+            </form>
+        </section>
+    `;
+
+    document
+        .getElementById("produitForm")
+        .addEventListener("submit", async event => {
+
+            event.preventDefault();
+
+            const donnees = {
+                nom: document.getElementById("produitNom").value.trim(),
+                prix: Number(document.getElementById("produitPrix").value),
+                stock: Number(document.getElementById("produitStock").value || 0),
+                categorie: document.getElementById("produitCategorie").value.trim(),
+                unite: document.getElementById("produitUnite").value.trim() || "unité",
+                photo: document.getElementById("produitPhoto").value.trim(),
+                description: document.getElementById("produitDescription").value.trim()
+            };
+
+            try {
+
+                const response = await fetch(
+                    modification
+                        ? `/api/produits/${produit.id}`
+                        : "/api/produits",
+                    {
+                        method: modification ? "PUT" : "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(donnees)
+                    }
+                );
+
+                const resultat = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(resultat.error || "Erreur");
+                }
+
+                alert(
+                    modification
+                        ? "✅ Produit modifié"
+                        : "✅ Produit ajouté"
+                );
+
+                afficherProduits();
+
+            } catch (erreur) {
+                console.error(erreur);
+                alert("❌ " + erreur.message);
+            }
+        });
+};
+
+
+window.modifierProduit = function modifierProduit(id) {
+
+    const produit = produitsFaktu.find(
+        p => p.id === id
+    );
+
+    if (!produit) {
+        alert("❌ Produit introuvable");
+        return;
+    }
+
+    afficherFormulaireProduit(produit);
+};
+
+
+window.changerStatutProduit = async function changerStatutProduit(id, actif) {
+
+    try {
+
+        const response = await fetch(
+            `/api/produits/${id}/statut`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ actif })
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Impossible de modifier le statut");
+        }
+
+        await afficherListeProduits();
+
+    } catch (erreur) {
+        console.error(erreur);
+        alert("❌ " + erreur.message);
+    }
+};
+
+
+window.supprimerProduit = async function supprimerProduit(id) {
+
+    if (!confirm("Supprimer définitivement ce produit ?")) {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            `/api/produits/${id}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        if (!response.ok) {
+            const resultat = await response.json();
+            throw new Error(resultat.error || "Erreur");
+        }
+
+        alert("✅ Produit supprimé");
+
+        await afficherListeProduits();
+
+    } catch (erreur) {
+        console.error(erreur);
+        alert("❌ " + erreur.message);
+    }
+};
+
+/* =========================================================
+   CORRECTION NAVIGATION ACCUEIL
+   ========================================================= */
+window.allerAccueil = function () {
+    window.location.reload();
+};

@@ -2,110 +2,77 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Faktu — Gestion commerciale</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}
-header{background:#172033;color:white;padding:20px}
-.logo{font-size:28px;font-weight:700}
-.logo span{color:#4f8cff}
-.container{padding:20px;max-width:1100px;margin:auto}
-.welcome{margin-bottom:25px}
-.welcome h1{font-size:26px;margin-bottom:8px}
-.welcome p{color:#667085}
-.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
-.card{background:white;border-radius:16px;padding:20px;box-shadow:0 4px 15px #0000000d}
-.card .icon{font-size:28px;margin-bottom:12px}
-.card h3{font-size:15px;color:#667085;margin-bottom:8px}
-.card strong{font-size:25px}
-.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
-.action{background:white;border:0;border-radius:16px;padding:20px;text-align:left;font-size:16px;box-shadow:0 4px 15px #0000000d}
-.action b{display:block;margin-bottom:6px;font-size:18px}
-.action span{color:#667085;font-size:13px}
-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;display:flex;justify-content:space-around;padding:12px 5px}
-nav div{text-align:center;color:#667085;font-size:11px}
-nav .active{color:#4f8cff;font-weight:bold}
-nav .emoji{font-size:21px;display:block;margin-bottom:3px}
-@media(min-width:700px){
-.cards{grid-template-columns:repeat(4,1fr)}
-.actions{grid-template-columns:repeat(4,1fr)}
-nav{position:static;margin-top:30px;border-radius:15px}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#fff;
 }
+body{
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+#splash{
+  position:relative;
+  width:min(100vw, calc(100vh * 736 / 1308));
+  height:min(100vh, calc(100vw * 1308 / 736));
+  aspect-ratio:736/1308;
+  flex:0 0 auto;
+  overflow:hidden;
+  background:url('/faktu-start-reference.png') center center / 100% 100% no-repeat;
+}
+.hit{
+  position:absolute;
+  display:block;
+  border:0;
+  padding:0;
+  margin:0;
+  background:transparent;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+/* Zones interactives exactement superposées aux boutons du visuel */
+#start{left:8.7%;top:71.9%;width:82.6%;height:5.9%;border-radius:999px}
+#login{left:8.7%;top:78.9%;width:82.6%;height:5.7%;border-radius:999px}
+
+/* Les quatre blocs peuvent être touchés sans modifier le visuel */
+#sell{left:4%;top:35.0%;width:23%;height:12%;border-radius:22px}
+#invoice{left:70%;top:35.0%;width:25%;height:12%;border-radius:22px}
+#collect{left:4%;top:49.3%;width:23%;height:12%;border-radius:22px}
+#delivery{left:70%;top:49.3%;width:25%;height:12%;border-radius:22px}
+
+/* Langues */
+#lang-fr{left:8%;top:89.3%;width:25%;height:5.8%}
+#lang-en{left:37%;top:89.3%;width:25%;height:5.8%}
+#lang-ar{left:66%;top:89.3%;width:26%;height:5.8%}
 </style>
 </head>
 <body>
+<main id="splash" aria-label="Écran de démarrage Faktu">
+  <button id="start" class="hit" aria-label="Commencer"
+    onclick="window.location.href='/dashboard.html'"></button>
+  <button id="login" class="hit" aria-label="J’ai déjà un compte"
+    onclick="window.location.href='/dashboard.html'"></button>
 
-<header>
-<div class="logo">Fak<span>tu</span></div>
-</header>
+  <button id="sell" class="hit" aria-label="Vendez facilement"
+    onclick="window.location.href='/dashboard.html'"></button>
+  <button id="invoice" class="hit" aria-label="Facturez en un clic"
+    onclick="window.location.href='/dashboard.html'"></button>
+  <button id="collect" class="hit" aria-label="Encaissez rapidement"
+    onclick="window.location.href='/dashboard.html'"></button>
+  <button id="delivery" class="hit" aria-label="Livrez sans stress"
+    onclick="window.location.href='/dashboard.html'"></button>
 
-<main class="container">
-
-<section class="welcome">
-<h1>Bonjour 👋</h1>
-<p>Bienvenue sur votre espace de gestion commerciale.</p>
-</section>
-
-<section class="cards">
-<div class="card">
-<div class="icon">🧾</div>
-<h3>Factures</h3>
-<strong id="totalFactures">0</strong>
-</div>
-
-<div class="card" onclick="afficherClients()" style="cursor:pointer;">
-<div class="icon">👥</div>
-<h3>Clients</h3>
-<strong id="totalClients">0</strong>
-</div>
-
-<div class="card">
-<div class="icon">📄</div>
-<h3>Documents</h3>
-<strong>0</strong>
-</div>
-
-<div class="card">
-<div class="icon">🔎</div>
-<h3>Recherches</h3>
-<strong>0</strong>
-</div>
-</section>
-
-<section class="actions">
-<button class="action">
-<b>➕ Nouvelle facture</b>
-<span>Créer rapidement une facture</span>
-</button>
-
-<button class="action">
-<b>👤 Nouveau client</b>
-<span>Ajouter un client</span>
-</button>
-
-<button class="action">
-<b>📁 Documents</b>
-<span>Gérer vos documents commerciaux</span>
-</button>
-
-<button class="action">
-<b>🔍 Recherche</b>
-<span>Retrouver facilement votre historique</span>
-</button>
-</section>
-
-
-
-    <div id="listeClients"></div>
+  <button id="lang-fr" class="hit" aria-label="Français"></button>
+  <button id="lang-en" class="hit" aria-label="English"></button>
+  <button id="lang-ar" class="hit" aria-label="العربية"></button>
 </main>
-<nav>
-<div class="active"><span class="emoji">🏠</span>Accueil</div>
-<div onclick="afficherFactures()" style="cursor:pointer"><span class="emoji">🧾</span>Factures</div>
-<div onclick="afficherClients()" style="cursor:pointer"><span class="emoji">👥</span>Clients</div>
-<div><span class="emoji">📁</span>Documents</div>
-<div><span class="emoji">⚙️</span>Paramètres</div>
-</nav>
-<script>window.onerror=function(msg,src,line,col){document.body.innerHTML="<pre style="color:red;padding:20px">ERREUR JS: "+msg+"\nLigne: "+line+"\nColonne: "+col+"</pre>";};</script><script src="/app.js?v=8"></script>
+<script src="/app.js?v=12"></script>
 </body>
 </html>

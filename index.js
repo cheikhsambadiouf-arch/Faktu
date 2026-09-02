@@ -242,3 +242,196 @@ app.delete('/api/factures/:id', (req, res) => {
   });
 });
 
+
+
+/* =========================================
+   API PRODUITS
+   ========================================= */
+
+const PRODUITS_FILE = `${DATA_DIR}/produits.json`;
+
+if (!fs.existsSync(PRODUITS_FILE)) {
+  fs.writeFileSync(PRODUITS_FILE, '[]');
+}
+
+function getProduits() {
+  try {
+    return JSON.parse(
+      fs.readFileSync(PRODUITS_FILE, 'utf8')
+    );
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveProduits(produits) {
+  fs.writeFileSync(
+    PRODUITS_FILE,
+    JSON.stringify(produits, null, 2)
+  );
+}
+
+// Liste des produits
+app.get('/api/produits', (req, res) => {
+  res.json(getProduits());
+});
+
+// Ajouter un produit
+app.post('/api/produits', (req, res) => {
+  const produits = getProduits();
+
+  const nom = String(req.body.nom || '').trim();
+
+  if (!nom) {
+    return res.status(400).json({
+      error: 'Le nom du produit est obligatoire'
+    });
+  }
+
+  const prix = Number(req.body.prix);
+
+  if (!Number.isFinite(prix) || prix < 0) {
+    return res.status(400).json({
+      error: 'Le prix est invalide'
+    });
+  }
+
+  const stock = Number(req.body.stock ?? 0);
+
+  if (!Number.isFinite(stock) || stock < 0) {
+    return res.status(400).json({
+      error: 'Le stock est invalide'
+    });
+  }
+
+  const nouveauProduit = {
+    id: Date.now(),
+    nom,
+    description: String(req.body.description || ''),
+    prix,
+    stock,
+    unite: String(req.body.unite || 'unité'),
+    categorie: String(req.body.categorie || ''),
+    photo: String(req.body.photo || ''),
+    actif: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  produits.push(nouveauProduit);
+  saveProduits(produits);
+
+  res.status(201).json(nouveauProduit);
+});
+
+// Modifier un produit
+app.put('/api/produits/:id', (req, res) => {
+  const produits = getProduits();
+  const id = Number(req.params.id);
+
+  const index = produits.findIndex(
+    produit => produit.id === id
+  );
+
+  if (index === -1) {
+    return res.status(404).json({
+      error: 'Produit introuvable'
+    });
+  }
+
+  const produit = produits[index];
+
+  const prix = req.body.prix !== undefined
+    ? Number(req.body.prix)
+    : produit.prix;
+
+  const stock = req.body.stock !== undefined
+    ? Number(req.body.stock)
+    : produit.stock;
+
+  if (!Number.isFinite(prix) || prix < 0) {
+    return res.status(400).json({
+      error: 'Le prix est invalide'
+    });
+  }
+
+  if (!Number.isFinite(stock) || stock < 0) {
+    return res.status(400).json({
+      error: 'Le stock est invalide'
+    });
+  }
+
+  produits[index] = {
+    ...produit,
+    nom: req.body.nom !== undefined
+      ? String(req.body.nom).trim()
+      : produit.nom,
+    description: req.body.description !== undefined
+      ? String(req.body.description)
+      : produit.description,
+    prix,
+    stock,
+    unite: req.body.unite !== undefined
+      ? String(req.body.unite)
+      : produit.unite,
+    categorie: req.body.categorie !== undefined
+      ? String(req.body.categorie)
+      : produit.categorie,
+    photo: req.body.photo !== undefined
+      ? String(req.body.photo)
+      : produit.photo,
+    actif: req.body.actif !== undefined
+      ? Boolean(req.body.actif)
+      : produit.actif,
+    updatedAt: new Date().toISOString()
+  };
+
+  saveProduits(produits);
+
+  res.json(produits[index]);
+});
+
+// Désactiver / réactiver un produit
+app.patch('/api/produits/:id/statut', (req, res) => {
+  const produits = getProduits();
+  const id = Number(req.params.id);
+
+  const index = produits.findIndex(
+    produit => produit.id === id
+  );
+
+  if (index === -1) {
+    return res.status(404).json({
+      error: 'Produit introuvable'
+    });
+  }
+
+  produits[index].actif = req.body.actif !== false;
+  produits[index].updatedAt = new Date().toISOString();
+
+  saveProduits(produits);
+
+  res.json(produits[index]);
+});
+
+// Supprimer définitivement un produit
+app.delete('/api/produits/:id', (req, res) => {
+  const produits = getProduits();
+  const id = Number(req.params.id);
+
+  const nouveauxProduits = produits.filter(
+    produit => produit.id !== id
+  );
+
+  if (nouveauxProduits.length === produits.length) {
+    return res.status(404).json({
+      error: 'Produit introuvable'
+    });
+  }
+
+  saveProduits(nouveauxProduits);
+
+  res.json({
+    success: true
+  });
+});

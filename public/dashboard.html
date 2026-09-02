@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Faktu — Gestion commerciale</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    min-height:100%;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f5f7fb;
+    color:#172033;
+    padding-bottom:90px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+header{
+    background:#172033;
+    color:white;
+    padding:18px 20px;
+}
+
+.header-inner{
+    max-width:1100px;
+    margin:auto;
+}
+
+.logo{
+    font-size:29px;
+    font-weight:800;
+    letter-spacing:-1px;
+}
+
+.logo span{
+    color:#4f8cff;
+}
+
+.header-subtitle{
+    margin-top:3px;
+    font-size:12px;
+    opacity:.75;
+}
+
+/* =========================
+   CONTENU
+========================= */
+
+.container{
+    width:100%;
+    max-width:1100px;
+    margin:auto;
+    padding:25px 20px;
+}
+
+.welcome{
+    margin-bottom:25px;
+}
+
+.welcome h1{
+    font-size:27px;
+    margin-bottom:8px;
+}
+
+.welcome p{
+    color:#667085;
+    line-height:1.5;
+}
+
+/* =========================
+   CARTES
+========================= */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.card{
+    background:white;
+    border-radius:17px;
+    padding:20px;
+    box-shadow:0 4px 15px rgba(0,0,0,.05);
+    cursor:pointer;
+    transition:transform .15s,box-shadow .15s;
+}
+
+.card:active{
+    transform:scale(.98);
+}
+
+.card .icon{
+    font-size:29px;
+    margin-bottom:12px;
+}
+
+.card h3{
+    font-size:14px;
+    color:#667085;
+    margin-bottom:7px;
+}
+
+.card strong{
+    font-size:25px;
+}
+
+/* =========================
+   ACTIONS RAPIDES
+========================= */
+
+.actions{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:15px;
+}
+
+.action{
+    width:100%;
+    background:white;
+    border:0;
+    border-radius:17px;
+    padding:20px;
+    text-align:left;
+    font-size:16px;
+    color:#172033;
+    box-shadow:0 4px 15px rgba(0,0,0,.05);
+    cursor:pointer;
+}
+
+.action b{
+    display:block;
+    margin-bottom:7px;
+    font-size:17px;
+}
+
+.action span{
+    color:#667085;
+    font-size:13px;
+    line-height:1.4;
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:200;
+
+    background:white;
+    border-top:1px solid #e5e7eb;
+
+    display:flex;
+    justify-content:space-around;
+
+    padding:9px 3px;
+
+    box-shadow:0 -3px 15px rgba(0,0,0,.05);
+}
+
+nav div{
+    flex:1;
+    min-width:0;
+
+    text-align:center;
+
+    color:#667085;
+
+    font-size:10px;
+
+    padding:5px 2px;
+
+    cursor:pointer;
+
+    border-radius:10px;
+}
+
+nav div.active{
+    color:#4f8cff;
+    font-weight:bold;
+}
+
+nav .emoji{
+    display:block;
+    font-size:21px;
+    line-height:23px;
+    margin-bottom:3px;
+}
+
+/* =========================
+   TABLET / DESKTOP
+========================= */
+
+@media(min-width:700px){
+
+    body{
+        padding-bottom:0;
+    }
+
+    .cards{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+
+    .actions{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+
+    nav{
+        position:static;
+
+        max-width:1100px;
+
+        margin:20px auto;
+
+        border:1px solid #e5e7eb;
+
+        border-radius:16px;
+
+        box-shadow:none;
+    }
+}
+
+/* =========================
+   PETITS TELEPHONES
+========================= */
+
+@media(max-width:380px){
+
+    .container{
+        padding:20px 14px;
+    }
+
+    .welcome h1{
+        font-size:24px;
+    }
+
+    .card{
+        padding:16px;
+    }
+
+    .action{
+        padding:16px;
+    }
+
+    nav .emoji{
+        font-size:19px;
+    }
+
+    nav div{
+        font-size:9px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="header-inner">
+
+        <div class="logo">
+            Fak<span>tu</span>
+        </div>
+
+        <div class="header-subtitle">
+            Gestion commerciale
+        </div>
+
+    </div>
+
+</header>
+
+<main id="faktuMain">
+
+    <div class="container">
+
+        <section class="welcome">
+
+            <h1>Bonjour 👋</h1>
+
+            <p>
+                Bienvenue sur votre espace de gestion commerciale.
+            </p>
+
+        </section>
+
+
+        <!-- =========================
+             STATISTIQUES
+        ========================== -->
+
+        <section class="cards">
+
+            <div class="card"
+                 onclick="afficherFactures()">
+
+                <div class="icon">
+                    🧾
+                </div>
+
+                <h3>
+                    Factures
+                </h3>
+
+                <strong id="totalFactures">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="card"
+                 onclick="afficherClients()">
+
+                <div class="icon">
+                    👥
+                </div>
+
+                <h3>
+                    Clients
+                </h3>
+
+                <strong id="totalClients">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="card"
+                 onclick="afficherProduits()">
+
+                <div class="icon">
+                    📦
+                </div>
+
+                <h3>
+                    Produits
+                </h3>
+
+                <strong id="totalProduits">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="card"
+                 onclick="afficherDocuments()">
+
+                <div class="icon">
+                    📄
+                </div>
+
+                <h3>
+                    Documents
+                </h3>
+
+                <strong id="totalDocuments">
+                    0
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             ACTIONS RAPIDES
+        ========================== -->
+
+        <section class="actions">
+
+            <button class="action"
+                    onclick="afficherFormulaireFacture()">
+
+                <b>
+                    ➕ Nouvelle facture
+                </b>
+
+                <span>
+                    Créer rapidement une facture
+                </span>
+
+            </button>
+
+
+            <button class="action"
+                    onclick="afficherFormulaire()">
+
+                <b>
+                    👤 Nouveau client
+                </b>
+
+                <span>
+                    Ajouter un client
+                </span>
+
+            </button>
+
+
+            <button class="action"
+                    onclick="afficherFormulaireProduit()">
+
+                <b>
+                    📦 Nouveau produit
+                </b>
+
+                <span>
+                    Ajouter un produit à votre catalogue
+                </span>
+
+            </button>
+
+
+            <button class="action"
+                    onclick="afficherDocuments()">
+
+                <b>
+                    📁 Documents
+                </b>
+
+                <span>
+                    Gérer vos documents commerciaux
+                </span>
+
+            </button>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+<!-- =========================
+     NAVIGATION PRINCIPALE
+========================== -->
+
+<nav id="faktuNav">
+
+    <div class="active"
+         data-page="accueil"
+         onclick="allerAccueil()">
+
+        <span class="emoji">
+            🏠
+        </span>
+
+        Accueil
+
+    </div>
+
+
+    <div data-page="factures"
+         onclick="afficherFactures()">
+
+        <span class="emoji">
+            🧾
+        </span>
+
+        Factures
+
+    </div>
+
+
+    <div data-page="clients"
+         onclick="afficherClients()">
+
+        <span class="emoji">
+            👥
+        </span>
+
+        Clients
+
+    </div>
+
+
+    <div data-page="produits"
+         onclick="afficherProduits()">
+
+        <span class="emoji">
+            📦
+        </span>
+
+        Produits
+
+    </div>
+
+
+    <div data-page="documents"
+         onclick="afficherDocuments()">
+
+        <span class="emoji">
+            📁
+        </span>
+
+        Documents
+
+    </div>
+
+
+    <div data-page="parametres"
+         onclick="afficherParametres()">
+
+        <span class="emoji">
+            ⚙️
+        </span>
+
+        Paramètres
+
+    </div>
+
+</nav>
+
+
+<script>
+
+window.onerror=function(msg,src,line,col){
+
+    document.body.innerHTML=
+        '<pre style="color:red;padding:20px;white-space:pre-wrap;">'
+        +
+        'ERREUR JS : '
+        +
+        msg
+        +
+        '\nLigne : '
+        +
+        line
+        +
+        '\nColonne : '
+        +
+        col
+        +
+        '</pre>';
+
+};
+
+</script>
+
+
+<script src="/app.js?v=11"></script>
+
+</body>
+</html>
